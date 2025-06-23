@@ -1,19 +1,19 @@
-import mongoose, { Types } from "mongoose";
+import mongoose from "mongoose";
 
 const UserSchema = new mongoose.Schema(
   {
     username: {
-      Types: String,
+      type: String,
       required: true,
       unique: true,
     },
     email: {
-      Types: String,
+      type: String,
       required: true,
       unique: true,
     },
     password: {
-      Types: String,
+      type: String,
       required: true,
     },
   },
