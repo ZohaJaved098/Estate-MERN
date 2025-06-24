@@ -43,7 +43,6 @@ export default function SignUp() {
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <input
           type="text"
-          // name="username"
           id="username"
           placeholder="Username"
           className="border p-3 rounded-lg"
@@ -51,7 +50,6 @@ export default function SignUp() {
         />
         <input
           type="text"
-          // name="email"
           id="email"
           placeholder="E-mail"
           className="border p-3 rounded-lg"
@@ -59,7 +57,6 @@ export default function SignUp() {
         />
         <input
           type="password"
-          // name="password"
           id="password"
           placeholder="Password"
           className="border p-3 rounded-lg"
