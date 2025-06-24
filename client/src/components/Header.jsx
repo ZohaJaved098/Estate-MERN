@@ -11,14 +11,11 @@ export default function Header() {
             <span>Estate</span>
           </h1>
         </Link>
-        <form
-          action=""
-          className="flex items-center bg-slate-100 rounded-md p-3 "
-        >
+        <form className="flex items-center bg-slate-100 rounded-md p-3 ">
           <input
             type="search"
-            name=""
-            id=""
+            name="search"
+            id="search"
             className="bg-transparent outline-0 w-22 sm:w-60"
             placeholder="Search..."
           />
