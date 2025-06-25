@@ -39,3 +39,39 @@ export const signin = async (req, res, next) => {
     next(error); // Pass the error to the error handling middleware
   }
 };
+
+export const googleAuth = async (req, res, next) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    if (user) {
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+      const { password, ...restInfo } = user._doc; // Exclude password from the response
+      res
+        .cookie("access_token", token, { httpOnly: true })
+        .status(200)
+        .json(restInfo); // Send the user info without the password
+    } else {
+      const generatedPassword =
+        Math.random().toString(36).slice(-8) +
+        Math.random().toString(36).slice(-8); // Generate a random password
+      const hashedPassword = bcrypt.hashSync(generatedPassword, 10); // Encrypt the password
+      const newUser = new User({
+        username:
+          req.body.name.split(" ").join("").toLowerCase() +
+          Math.random().toString(36).slice(-4), // Generate a random username
+        email: req.body.email,
+        password: hashedPassword,
+        avatar: req.body.photo,
+      });
+      await newUser.save();
+      const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
+      const { password, ...restInfo } = newUser._doc; // Exclude password from the response
+      res
+        .cookie("access_token", token, { httpOnly: true })
+        .status(200)
+        .json(restInfo); // Send the user info without the password
+    }
+  } catch (error) {
+    next(error); // Pass the error to the error handling middleware
+  }
+};
