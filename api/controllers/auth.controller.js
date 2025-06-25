@@ -43,7 +43,12 @@ export const signin = async (req, res, next) => {
 export const googleAuth = async (req, res, next) => {
   try {
     const user = await User.findOne({ email: req.body.email });
+
     if (user) {
+      if (req.body.photo && user.avatar !== req.body.photo) {
+        user.avatar = req.body.photo;
+        await user.save();
+      }
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
       const { password, ...restInfo } = user._doc; // Exclude password from the response
       res
