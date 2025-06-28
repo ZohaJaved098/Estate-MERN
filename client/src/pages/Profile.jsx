@@ -1,68 +1,68 @@
-import { useSelector } from "react-redux";
-import { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useRef, useState, useEffect } from "react";
+import axios from "axios";
+
 import {
   updateUserStart,
   updateUserSuccess,
   updateUserFailure,
 } from "../redux/user/userSlice";
-import { useDispatch } from "react-redux";
-//WILL WORK ON IT LATER useEffect, useRef,
+
 export default function Profile() {
+  const fileRef = useRef(null);
   const { currentUser, loading, error } = useSelector((state) => state.user);
-  //   const fileRef = useRef(null);
-
-  //   const [file, setFile] = useState(undefined);
-  //   const [avatarUrl, setAvatarUrl] = useState(currentUser.avatar);
-  //   const [uploadError, setUploadError] = useState(false);
-  //   const [uploading, setUploading] = useState(false);
+  const [file, setFile] = useState(undefined);
+  const [filePerc, setFilePerc] = useState(0);
+  const [fileUploadError, setFileUploadError] = useState(false);
   const [formData, setFormData] = useState({});
-  const dispatch = useDispatch();
   const [updateSuccess, setUpdateSuccess] = useState(false);
+  const dispatch = useDispatch();
 
-  //   useEffect(() => {
-  //     if (file) {
-  //       handleFileUpload(file); // ✅ pass the file
-  //     }
-  //   }, [file]);
+  useEffect(() => {
+    if (!file) return;
 
-  //   const handleFileUpload = async (file) => {
-  //     setUploading(true);
-  //     setUploadError(false);
+    const handleFileUpload = async () => {
+      const formDataCloud = new FormData();
+      formDataCloud.append("file", file);
+      formDataCloud.append(
+        "upload_preset",
+        import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
+      );
 
-  //     const formData = new FormData();
-  //     formData.append("file", file);
-  //     formData.append(
-  //       "upload_preset",
-  //       import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
-  //     );
+      try {
+        setFileUploadError(false);
+        setFilePerc(0);
 
-  //     try {
-  //       const res = await fetch(
-  //         `https://api.cloudinary.com/v1_1/dmmiehapo/image/upload
-  // `,
-  //         {
-  //           method: "POST",
-  //           body: formData,
-  //         }
-  //       );
+        const res = await axios.post(
+          `https://api.cloudinary.com/v1_1/${
+            import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+          }/image/upload`,
+          formDataCloud,
+          {
+            onUploadProgress: (progressEvent) => {
+              const percent = Math.round(
+                (progressEvent.loaded * 100) / progressEvent.total
+              );
+              setFilePerc(percent);
+            },
+          }
+        );
 
-  //       const data = await res.json();
-  //       if (res.ok) {
-  //         console.log("Upload successful:", data);
-  // setAvatarUrl(data.secure_url);
-  //       } else {
-  //         throw new Error(data.error?.message || "Upload failed");
-  //       }
-  //     } catch (err) {
-  //       console.error("Upload failed:", err);
-  //       setUploadError(true);
-  //     } finally {
-  //       setUploading(false);
-  //     }
-  //   };
+        setFormData((prev) => ({ ...prev, avatar: res.data.secure_url }));
+      } catch (err) {
+        console.error(err);
+        setFileUploadError(true);
+        setFilePerc(0);
+      }
+    };
+
+    handleFileUpload();
+  }, [file]);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -79,6 +79,7 @@ export default function Profile() {
         dispatch(updateUserFailure(data.message));
         return;
       }
+
       dispatch(updateUserSuccess(data));
       setUpdateSuccess(true);
     } catch (error) {
@@ -86,58 +87,71 @@ export default function Profile() {
     }
   };
 
+  // const handleDeleteUser = () => {
+  //   // Placeholder for delete logic
+  //   console.log("Delete user clicked");
+  // };
+
+  // const handleSignOut = () => {
+  //   // Placeholder for sign out logic
+  //   console.log("Sign out clicked");
+  // };
+
   return (
     <div className="p-3 max-w-lg mx-auto">
-      <h1 className=" text-3xl font-semibold text-center my-7">Profile</h1>
-
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4 ">
+      <h1 className="text-3xl font-semibold text-center my-7">Profile</h1>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <input
-          // onChange={(e) => setFile(e.target.files[0])}
+          onChange={(e) => {
+            const selectedFile = e.target.files[0];
+            if (selectedFile && selectedFile.type.startsWith("image/")) {
+              setFile(selectedFile);
+            } else {
+              setFile(undefined);
+              setFileUploadError(true);
+              setFilePerc(0);
+            }
+          }}
           type="file"
-          //ref={fileRef}
+          ref={fileRef}
           hidden
           accept="image/*"
         />
 
         <img
-          //onClick={() => fileRef.current.click()}
-          src={currentUser.avatar}
+          onClick={() => fileRef.current.click()}
+          src={formData.avatar || currentUser.avatar}
           alt="profile"
           className="rounded-full h-24 w-24 object-cover cursor-pointer self-center mt-2"
         />
-
-        {/* {uploading && (
-          <p className="text-slate-500 text-sm text-center">
-            Uploading image...
-          </p>
-        )}
-        {uploadError && (
-          <p className="text-red-500 text-sm text-center">
-            Image upload failed!
-          </p>
-        )} */}
-
-        {/* <p className="text-slate-500 text-sm text-center">
-          You can click on the image to change image.
-        </p> */}
-
+        <p className="text-sm self-center">
+          {fileUploadError ? (
+            <span className="text-red-700">
+              Error uploading (image must be less than 2 MB)
+            </span>
+          ) : filePerc > 0 && filePerc < 100 ? (
+            <span className="text-slate-700">{`Uploading ${filePerc}%`}</span>
+          ) : filePerc === 100 ? (
+            <span className="text-green-700">Image successfully uploaded!</span>
+          ) : (
+            ""
+          )}
+        </p>
         <input
           type="text"
-          placeholder="UserName"
+          placeholder="username"
           defaultValue={currentUser.username}
-          onChange={handleChange}
           id="username"
           className="border p-3 rounded-lg"
-          autoComplete="false"
+          onChange={handleChange}
         />
         <input
           type="email"
-          placeholder="Email"
-          defaultValue={currentUser.email}
-          onChange={handleChange}
+          placeholder="email"
           id="email"
+          defaultValue={currentUser.email}
           className="border p-3 rounded-lg"
-          autoComplete="false"
+          onChange={handleChange}
         />
         <input
           type="password"
@@ -150,17 +164,27 @@ export default function Profile() {
           disabled={loading}
           className="bg-slate-700 text-white rounded-lg p-3 uppercase hover:opacity-95 disabled:opacity-80"
         >
-          {loading ? " Updating..." : "Update"}
+          {loading ? "Loading..." : "Update"}
         </button>
       </form>
-
-      <div className=" flex justify-between items-center mt-5">
-        <span className=" text-red-700 cursor-pointer">Delete Account</span>
-        <span className=" text-red-700 cursor-pointer">Sign Out</span>
+      <div className="flex justify-between mt-5">
+        <span
+          // onClick={handleDeleteUser}
+          className="text-red-700 cursor-pointer"
+        >
+          Delete account
+        </span>
+        <span
+          // onClick={handleSignOut}
+          className="text-red-700 cursor-pointer"
+        >
+          Sign out
+        </span>
       </div>
+
       <p className="text-red-700 mt-5">{error ? error : ""}</p>
       <p className="text-green-700 mt-5">
-        {updateSuccess ? "Updated Successfully" : ""}
+        {updateSuccess ? "User is updated successfully!" : ""}
       </p>
     </div>
   );
