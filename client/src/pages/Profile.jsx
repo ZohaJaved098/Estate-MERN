@@ -6,6 +6,9 @@ import {
   updateUserStart,
   updateUserSuccess,
   updateUserFailure,
+  deleteUserStart,
+  deleteUserSuccess,
+  deleteUserFailure,
 } from "../redux/user/userSlice";
 
 export default function Profile() {
@@ -87,15 +90,23 @@ export default function Profile() {
     }
   };
 
-  // const handleDeleteUser = () => {
-  //   // Placeholder for delete logic
-  //   console.log("Delete user clicked");
-  // };
+  const handleDeleteUser = async () => {
+    try {
+      dispatch(deleteUserStart());
+      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+        method: "DELETE",
+      });
+      const data = res.json();
 
-  // const handleSignOut = () => {
-  //   // Placeholder for sign out logic
-  //   console.log("Sign out clicked");
-  // };
+      if (data.success === false) {
+        dispatch(deleteUserFailure(data.message));
+        return;
+      }
+      dispatch(deleteUserSuccess(data));
+    } catch (error) {
+      dispatch(deleteUserFailure(error.message));
+    }
+  };
 
   return (
     <div className="p-3 max-w-lg mx-auto">
@@ -169,7 +180,7 @@ export default function Profile() {
       </form>
       <div className="flex justify-between mt-5">
         <span
-          // onClick={handleDeleteUser}
+          onClick={handleDeleteUser}
           className="text-red-700 cursor-pointer"
         >
           Delete account
