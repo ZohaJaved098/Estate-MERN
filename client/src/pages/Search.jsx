@@ -219,10 +219,10 @@ export default function Search() {
               id="sort_order"
               className="border rounded-lg p-3"
             >
+              <option value="createdAt_desc">Latest First</option>
+              <option value="createdAt_asc">Oldest First</option>
               <option value="regularPrice_desc">Price high to low</option>
               <option value="regularPrice_asc">Price low to high</option>
-              <option value="createdAt_desc">Latest</option>
-              <option value="createdAt_asc">Oldest</option>
             </select>
           </div>
           <button className="bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95">

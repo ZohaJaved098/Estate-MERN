@@ -158,9 +158,10 @@ export default function Profile() {
         prev.filter((listing) => listing._id !== listingId)
       );
     } catch (error) {
-      console.log(error);
+      console.log("error deleting listing", error);
     }
   };
+  // console.log("Listing from profile page", userListings);
 
   return (
     <div className="p-3 max-w-lg mx-auto">
@@ -270,7 +271,7 @@ export default function Profile() {
               className="border rounded-lg p-3 flex justify-between items-center gap-4"
               key={listing._id}
             >
-              <Link to={`listing/${listing._id}`}>
+              <Link to={`/listing/${listing._id}`}>
                 <img
                   className="h-16 w-16 object-contain rounded-lg "
                   src={listing.imageUrls[0]}
@@ -279,7 +280,7 @@ export default function Profile() {
               </Link>
               <Link
                 className="text-slate-700 font-semibold flex-1 hover:underline truncateflex-1 "
-                to={`listing/${listing._id}`}
+                to={`/listing/${listing._id}`}
               >
                 <p>{listing.name}</p>
               </Link>

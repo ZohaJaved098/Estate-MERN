@@ -43,8 +43,8 @@ export default function CreateListing() {
           setUploading(false);
         })
         .catch((err) => {
-          console.log(err);
-          setImageUploadError("Image upload failed (2 mb max per image)");
+          console.log("Error uploading image ", err);
+          setImageUploadError("Image upload failed (10 mb max per image)");
           setUploading(false);
         });
     } else {
@@ -54,6 +54,12 @@ export default function CreateListing() {
   };
   const storeImage = async (file) => {
     return new Promise((resolve, reject) => {
+      if (file.size > 10 * 1024 * 1024) {
+        setUploading(false);
+        return alert(
+          "Image too big! Max 10MB allowed. Try again with smaller size!"
+        );
+      }
       const formData = new FormData();
       formData.append("file", file);
       formData.append(

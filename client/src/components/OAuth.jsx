@@ -28,10 +28,8 @@ export default function OAuth() {
           photo: result.user.photoURL,
         }),
       });
-      // console.log("User image URL:", result.user.photoURL);
 
       const data = await res.json();
-      // console.log("Response from Google sign-in:", data);
 
       dispatch(signInSuccess(data));
       navigate("/");
